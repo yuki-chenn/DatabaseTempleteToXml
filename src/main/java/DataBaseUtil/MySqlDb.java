@@ -20,6 +20,7 @@ public class MySqlDb extends BaseDb implements IDbOperation{
 
     private final static String MYSQL_URL = "jdbc:mysql://%s:%s/%s?userUnicode=true&characterEnconding=UTF-8&serverTimezone=UTC";
     private final static String MYSQL_DRIVER = "com.mysql.cj.jdbc.Driver";
+    private final static String MYSQL_DRIVER_PRE = "com.mysql.jdbc.Driver";
 
     private final static String SQL_SELECT_ALL_TABLES = "select table_name from information_schema.tables where table_schema='%s'";
     private final static String SQL_SELECT_ALL_FROM_TABLE = "select * from %s";
@@ -30,7 +31,8 @@ public class MySqlDb extends BaseDb implements IDbOperation{
 
     public MySqlDb(String username,String password,String ip,String port,String dbName){
         super(ip,port,username,password,dbName);
-        this.driver = MYSQL_DRIVER;
+//        this.driver = MYSQL_DRIVER;
+        this.driver = MYSQL_DRIVER_PRE;
         this.url = String.format(MYSQL_URL,ip,port,dbName);
     }
 

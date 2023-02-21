@@ -4,6 +4,7 @@ import DataBaseUtil.BaseDb;
 import DataBaseUtil.DbFactory;
 import DataBaseUtil.IDbOperation;
 import DataBaseUtil.MySqlDb;
+import XmlUtil.XmlManager;
 
 /**
  * @author yuki
@@ -15,12 +16,14 @@ import DataBaseUtil.MySqlDb;
  */
 public class DbBean {
 
-    public static final String[] DBTYPE_ITEMS = {"MySql"};
+    public static final String[] DBTYPE_ITEMS = {"","MySql"};
 
     private BaseDb dataBase ;
 
-    public DbBean(){
+    private UserDataBean userCache;
 
+    public DbBean(){
+        userCache = XmlManager.getInstance().loadUserCacheXmlData();
     }
 
     public void setDataBase(BaseDb db){
@@ -29,6 +32,14 @@ public class DbBean {
 
     public BaseDb getDataBase() {
         return dataBase;
+    }
+
+    public UserDataBean getUserCache() {
+        return userCache;
+    }
+
+    public void setUserCache(UserDataBean userCache) {
+        this.userCache = userCache;
     }
 
 }

@@ -1,7 +1,9 @@
 package Frame;
 
 import Controller.DbConnectController;
+import Controller.WriteXmlController;
 import Model.DbBean;
+import Model.UserDataBean;
 
 import javax.swing.*;
 import java.awt.*;
@@ -59,6 +61,7 @@ public class MainFrame extends JFrame {
     public MainFrame(){
         bean = new DbBean();
         initGUI();
+        loadCache();
         refresh();
     }
 
@@ -178,6 +181,16 @@ public class MainFrame extends JFrame {
                 String port = textField_port.getText().toString();
                 String dbName = textField_dbName.getText().toString();
                 bean.setDataBase(DbConnectController.dbConnect(dbType,username,password,ip,port,dbName));
+                if(bean.getDataBase().isConnect()){
+                    UserDataBean cache = bean.getUserCache();
+                    cache.userData.put("dbType",dbType);
+                    cache.userData.put("username",username);
+                    cache.userData.put("password",password);
+                    cache.userData.put("ip",ip);
+                    cache.userData.put("port",port);
+                    cache.userData.put("dbName",dbName);
+                    WriteXmlController.writeUserData(cache);
+                }
             }
             refresh();
         });
@@ -185,6 +198,17 @@ public class MainFrame extends JFrame {
             textArea_sout.clearText();
             refresh();
         });
+    }
+
+    private void loadCache(){
+        UserDataBean cache = bean.getUserCache();
+        comboBox_dbtype.setSelectedItem(cache.userData.get("dbType"));
+        textField_ip.setText(cache.userData.get("ip"));
+        textField_port.setText(cache.userData.get("port"));
+        textField_username.setText(cache.userData.get("username"));
+        psdField_password.setText(cache.userData.get("password"));
+        textField_dbName.setText(cache.userData.get("dbName"));
+        comboBox_tableName.setSelectedItem(cache.userData.get("tableName"));
     }
 
     public void refresh(){

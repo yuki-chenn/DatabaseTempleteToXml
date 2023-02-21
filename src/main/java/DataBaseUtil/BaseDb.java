@@ -1,5 +1,6 @@
 package DataBaseUtil;
 
+import XmlUtil.XmlManager;
 import org.dom4j.Document;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
@@ -57,7 +58,7 @@ public abstract class BaseDb implements IDbOperation{
     public boolean isConnect(){
         boolean isConnect = false;
         try {
-            isConnect = !conn.isClosed();
+            if(conn != null) isConnect = !conn.isClosed();
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
@@ -93,7 +94,7 @@ public abstract class BaseDb implements IDbOperation{
         for(String path:paths){
 
             // 创建dom对象
-            Document document = DocumentHelper.createDocument();
+            Document document = XmlManager.getInstance().getDocument();
             Element root = document.addElement("root");
 
             // 添加节点
@@ -105,30 +106,7 @@ public abstract class BaseDb implements IDbOperation{
                 }
             }
 
-            // 格式化模板
-            OutputFormat format = OutputFormat.createPrettyPrint();
-            format.setEncoding("UTF-8");
-
-            // 生成xml文件
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
-            try {
-                XMLWriter writer = new XMLWriter(out, format);
-                writer.write(document);
-                writer.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-                System.err.println("生成xml文件失败。文件名【" + fileName + "】");
-            }
-
-            // 利用文件输出流输出到文件
-            try (FileOutputStream fos = new FileOutputStream(path + "/" + fileName + ".xml")) {
-                fos.write(out.toByteArray());
-            } catch (IOException e) {
-                e.printStackTrace();
-                System.err.println("xml文件写入失败。文件名【" + fileName + "】");
-            }
-
-            System.out.println("文件导出成功，位置：" + path + "/" + fileName + ".xml");
+            XmlManager.getInstance().generateXml(path + "/" + fileName + ".xml");
 
         }
     }
