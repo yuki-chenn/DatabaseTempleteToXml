@@ -6,6 +6,8 @@ import DataBaseUtil.IDbOperation;
 import DataBaseUtil.MySqlDb;
 import XmlUtil.XmlManager;
 
+import java.util.List;
+
 /**
  * @author yuki
  * @version 1.0.0
@@ -18,6 +20,8 @@ public class DbBean {
 
     public static final String[] DBTYPE_ITEMS = {"","MySql"};
 
+    private String[] tableList;
+
     private BaseDb dataBase ;
 
     private UserDataBean userCache;
@@ -28,6 +32,20 @@ public class DbBean {
 
     public void setDataBase(BaseDb db){
         this.dataBase = db;
+        setTableList();
+    }
+
+    private void setTableList(){
+        List<String> list = dataBase.getAllTableName();
+        tableList = new String[list.size() + 1];
+        for (int i=0;i<list.size();++i){
+            tableList[i+1] = list.get(i);
+        }
+    }
+
+    public String[] getTableList(){
+        if(this.tableList == null) tableList = new String[]{""};
+        return this.tableList;
     }
 
     public BaseDb getDataBase() {

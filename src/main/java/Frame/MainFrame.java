@@ -2,6 +2,7 @@ package Frame;
 
 import Controller.DbConnectController;
 import Controller.WriteXmlController;
+import DataBaseUtil.BaseDb;
 import Model.DbBean;
 import Model.UserDataBean;
 
@@ -116,15 +117,15 @@ public class MainFrame extends JFrame {
 
         //模板表名称
         label_tableName = new JLabel("模板表名称");
-        label_tableName.setBounds(20,250,100,20);
+        label_tableName.setBounds(20,230,100,20);
         comboBox_tableName = new JComboBox<>();
-        comboBox_tableName.setBounds(120,250,120,20);
+        comboBox_tableName.setBounds(20,255,240,20);
 
         // 文件路径
         label_path = new JLabel("文件路径");
         label_path.setBounds(20,280,100,20);
         textField_path = new JTextField();
-        textField_path.setBounds(20,305,220,20);
+        textField_path.setBounds(20,305,240,20);
 
         // 导出按钮
         btn_export = new JButton("导出");
@@ -194,6 +195,16 @@ public class MainFrame extends JFrame {
             }
             refresh();
         });
+        btn_export.addActionListener(e -> {
+            String path = textField_path.getText().toString();
+            String tableName = comboBox_tableName.getSelectedItem().toString();
+            BaseDb db = bean.getDataBase();
+            db.generateXml(new String[]{path},tableName,db.getAllDataByTableName(tableName),db.getAllColumsByTableName(tableName));
+            UserDataBean cache = bean.getUserCache();
+            cache.userData.put("tableName",tableName);
+            cache.userData.put("path",path);
+            WriteXmlController.writeUserData(bean.getUserCache());
+        });
         btn_clear.addActionListener(e -> {
             textArea_sout.clearText();
             refresh();
@@ -209,6 +220,7 @@ public class MainFrame extends JFrame {
         psdField_password.setText(cache.userData.get("password"));
         textField_dbName.setText(cache.userData.get("dbName"));
         comboBox_tableName.setSelectedItem(cache.userData.get("tableName"));
+        textField_path.setText(cache.userData.get("path"));
     }
 
     public void refresh(){
@@ -236,6 +248,9 @@ public class MainFrame extends JFrame {
         psdField_password.setEnabled(!isConnect);
 
         comboBox_tableName.setEnabled(isConnect);
+        comboBox_tableName.removeAllItems();
+        for(String str:bean.getTableList()) comboBox_tableName.addItem(str);
+        comboBox_tableName.setSelectedItem(bean.getUserCache().userData.get("tableName"));
         textField_path.setEnabled(isConnect);
 //
         //按钮

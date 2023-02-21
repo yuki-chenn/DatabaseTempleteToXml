@@ -102,7 +102,12 @@ public abstract class BaseDb implements IDbOperation{
                 Element element = root.addElement("data");
                 for(String column:columnList){
                     Element subElement = element.addElement(column);
-                    subElement.setText(data.get(column));
+                    if(data.containsKey(column)){
+                        subElement.setText(data.get(column));
+                    }else{
+                        subElement.setText("");
+                    }
+
                 }
             }
 

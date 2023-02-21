@@ -76,7 +76,7 @@ public class XmlManager {
             return;
         }
 
-        System.out.println("文件导出成功，位置：" + path);
+        if(!path.equals(UserDataBean.USER_DATA_PATH)) System.out.println("文件导出成功，位置：" + path);
     }
 
     public UserDataBean loadUserCacheXmlData(){
