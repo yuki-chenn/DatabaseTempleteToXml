@@ -1,9 +1,8 @@
 .DS_Store
 .idea
 *.iml
-.idea
 logs
 out
 gen
 target
-.userdata
+userdata
