@@ -50,7 +50,8 @@ public class MySqlDb extends BaseDb implements IDbOperation{
         try {
             Class.forName(driver);
         } catch (ClassNotFoundException e) {
-            e.printStackTrace();
+//            e.printStackTrace();
+            System.out.println("【ERROR】 数据库连接失败");
         }
 
         if(conn == null) {
@@ -59,8 +60,8 @@ public class MySqlDb extends BaseDb implements IDbOperation{
                 conn = DriverManager.getConnection(url, username, password);//获得连接
 
             } catch (SQLException throwables) {
-                throwables.printStackTrace();
-                System.err.println("数据库连接失败...");
+//                throwables.printStackTrace();
+                System.out.println("【ERROR】 数据库连接失败");
             }
         }
 

@@ -19,7 +19,8 @@ public class DbConnectController {
             dataBase = DbFactory.getInstance().getDataBase(dbType,username,password,ip,port,dbName);
             dataBase.loadConnection();
         } catch (Exception e) {
-            e.printStackTrace();
+//            e.printStackTrace();
+            System.out.println("【ERROR】 数据库连接失败");
         }
         return dataBase;
     }

@@ -91,6 +91,8 @@ public abstract class BaseDb implements IDbOperation{
      */
     @Override
     public void generateXml(String[] paths,String fileName,List<Map<String, String>> datas,List<String> columnList) {
+        if(fileName == null || fileName.length() == 0) return ;
+
         for(String path:paths){
 
             // 创建dom对象

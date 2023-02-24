@@ -48,6 +48,7 @@ public class MainFrame extends JFrame {
 
     //按钮
     JButton btn_connect;
+    JCheckBox checkBox_exportAll;
     JButton btn_export;
     JButton btn_clear;
 
@@ -129,7 +130,9 @@ public class MainFrame extends JFrame {
 
         // 导出按钮
         btn_export = new JButton("导出");
-        btn_export.setBounds(70,335,100,20);
+        btn_export.setBounds(20,340,100,20);
+        checkBox_exportAll = new JCheckBox("全选所有表");
+        checkBox_exportAll.setBounds(140,340,100,20);
 
         // 信息显示
         textArea_sout = new SystemOutTextArea();
@@ -166,6 +169,7 @@ public class MainFrame extends JFrame {
         this.add(label_path);
         this.add(textField_path);
         this.add(btn_export);
+        this.add(checkBox_exportAll);
         this.add(scrollPane_sout);
         this.add(btn_clear);
     }
@@ -182,7 +186,7 @@ public class MainFrame extends JFrame {
                 String port = textField_port.getText().toString();
                 String dbName = textField_dbName.getText().toString();
                 bean.setDataBase(DbConnectController.dbConnect(dbType,username,password,ip,port,dbName));
-                if(bean.getDataBase().isConnect()){
+                if(bean.getDataBase() != null && bean.getDataBase().isConnect()){
                     UserDataBean cache = bean.getUserCache();
                     cache.userData.put("dbType",dbType);
                     cache.userData.put("username",username);
@@ -199,7 +203,22 @@ public class MainFrame extends JFrame {
             String path = textField_path.getText().toString();
             String tableName = comboBox_tableName.getSelectedItem().toString();
             BaseDb db = bean.getDataBase();
-            db.generateXml(new String[]{path},tableName,db.getAllDataByTableName(tableName),db.getAllColumsByTableName(tableName));
+
+            boolean exportAll = checkBox_exportAll.isSelected();
+            if(exportAll){
+                System.out.println("导出所有表");
+                for(String table:bean.getTableList()){
+                    if(table == null || table.length() == 0) continue;
+                    db.generateXml(new String[]{path},table,db.getAllDataByTableName(table),db.getAllColumsByTableName(table));
+                }
+            }else{
+                if(tableName == null || tableName.length() == 0){
+                    System.out.println("【ERROR】 未选择模板表");
+                    return ;
+                }
+                db.generateXml(new String[]{path},tableName,db.getAllDataByTableName(tableName),db.getAllColumsByTableName(tableName));
+            }
+
             UserDataBean cache = bean.getUserCache();
             cache.userData.put("tableName",tableName);
             cache.userData.put("path",path);
@@ -256,6 +275,7 @@ public class MainFrame extends JFrame {
         //按钮
         btn_connect.setText(isConnect ? "断开" : "连接");
         btn_export.setEnabled(isConnect);
+        checkBox_exportAll.setEnabled(isConnect);
 
 
 

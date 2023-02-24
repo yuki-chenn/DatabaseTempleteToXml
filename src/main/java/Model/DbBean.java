@@ -32,7 +32,7 @@ public class DbBean {
 
     public void setDataBase(BaseDb db){
         this.dataBase = db;
-        setTableList();
+        if(dataBase != null && dataBase.isConnect()) setTableList();
     }
 
     private void setTableList(){
@@ -41,6 +41,7 @@ public class DbBean {
         for (int i=0;i<list.size();++i){
             tableList[i+1] = list.get(i);
         }
+        tableList[0] = "";
     }
 
     public String[] getTableList(){
