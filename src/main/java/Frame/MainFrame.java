@@ -63,6 +63,14 @@ public class MainFrame extends JFrame {
     JButton btn_chooseExcelFilePath;
     JButton btn_readFile;
 
+    // 一键替换
+    JComboBox<String> comboBox_tarSheetName;
+    JComboBox<String> comboBox_tarColumnName;
+    JComboBox<String> comboBox_foreignSheetName;
+    JComboBox<String> comboBox_replaceItem;
+    JButton btn_addReplace;
+    JButton btn_delReplace;
+
 
     // 提示信息
     JScrollPane scrollPane_sout;
@@ -162,6 +170,20 @@ public class MainFrame extends JFrame {
         textField_excelFilePath = new JTextField();
         textField_excelFilePath.setBounds(20,420,240,20);
 
+        // 一键替换
+        comboBox_tarSheetName = new JComboBox<String>();
+        comboBox_tarSheetName.setBounds(20,450,100,20);
+        comboBox_tarColumnName = new JComboBox<String>();
+        comboBox_tarColumnName.setBounds(20,480,100,20);
+        comboBox_foreignSheetName = new JComboBox<String>();
+        comboBox_foreignSheetName.setBounds(150,465,100,20);
+        btn_addReplace = new JButton("√");
+        btn_addReplace.setBounds(180,435,20,20);
+        comboBox_replaceItem = new JComboBox<String>();
+        comboBox_replaceItem.setBounds(20,480,100,20);
+        btn_delReplace = new JButton("删除");
+        btn_delReplace.setBounds(130,480,20,20);
+
         // 信息显示
         textArea_sout = new SystemOutTextArea();
         textArea_sout.setBounds(280,20,300,520);
@@ -205,6 +227,12 @@ public class MainFrame extends JFrame {
         this.add(btn_chooseExcelFilePath);
         this.add(btn_readFile);
         this.add(textField_excelFilePath);
+        this.add(comboBox_tarSheetName);
+        this.add(comboBox_tarColumnName);
+        this.add(comboBox_foreignSheetName);
+//        this.add(comboBox_replaceItem);
+//        this.add(btn_addReplace);
+//        this.add(btn_delReplace);
     }
 
     private void addListener(){
