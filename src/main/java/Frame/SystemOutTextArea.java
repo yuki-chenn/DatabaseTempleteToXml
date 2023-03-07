@@ -30,8 +30,12 @@ public class SystemOutTextArea extends JTextArea {
     private void updateTextArea(final String text) {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
-                sb.append(text);
-                setText(sb.toString());
+                if(text.length() > 2){
+                    sb.append(text);
+                    sb.append("\n********************************************************\n");
+                    setText(sb.toString());
+                }
+
             }
         });
     }

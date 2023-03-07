@@ -24,10 +24,8 @@ public class DbBean {
 
     private BaseDb dataBase ;
 
-    private UserDataBean userCache;
-
     public DbBean(){
-        userCache = XmlManager.getInstance().loadUserCacheXmlData();
+
     }
 
     public void setDataBase(BaseDb db){
@@ -53,12 +51,5 @@ public class DbBean {
         return dataBase;
     }
 
-    public UserDataBean getUserCache() {
-        return userCache;
-    }
-
-    public void setUserCache(UserDataBean userCache) {
-        this.userCache = userCache;
-    }
 
 }

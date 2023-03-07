@@ -79,8 +79,8 @@ public class XmlManager {
         if(!path.equals(UserDataBean.USER_DATA_PATH)) System.out.println("文件导出成功，位置：" + path);
     }
 
-    public UserDataBean loadUserCacheXmlData(){
-        UserDataBean userCache = new UserDataBean();
+    public Map<String,String> loadUserCacheXmlData(){
+        Map<String,String> userCache = new HashMap<>();
         String pathPrefix = UserDataBean.USER_DATA_PATH.substring(0,UserDataBean.USER_DATA_PATH.lastIndexOf('/') + 1);
         File parfile = new File(pathPrefix);
         if(!parfile.exists()){
@@ -103,7 +103,7 @@ public class XmlManager {
             Element rootElement = doc.getRootElement();
 
             for (String str: UserDataBean.USER_DATA_KEY) {
-                userCache.userData.put(str,rootElement.elementText(str));
+                userCache.put(str,rootElement.elementText(str));
             }
 
         } catch (Exception e) {

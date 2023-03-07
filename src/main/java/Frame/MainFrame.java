@@ -3,6 +3,7 @@ package Frame;
 import Controller.DbConnectController;
 import Controller.WriteXmlController;
 import DataBaseUtil.BaseDb;
+import FileUtil.FileChooserManager;
 import Model.DbBean;
 import Model.UserDataBean;
 
@@ -52,12 +53,24 @@ public class MainFrame extends JFrame {
     JButton btn_export;
     JButton btn_clear;
 
+    // 分割线
+    JLabel sepLine;
+
+
+    // 读取excel
+    JLabel label_excelFilePath;
+    JTextField textField_excelFilePath;
+    JButton btn_chooseExcelFilePath;
+    JButton btn_readFile;
+
 
     // 提示信息
     JScrollPane scrollPane_sout;
     SystemOutTextArea textArea_sout;
 
     DbBean bean;
+
+    UserDataBean userCache;
 
 
     public MainFrame(){
@@ -70,7 +83,7 @@ public class MainFrame extends JFrame {
     private void initGUI(){
 
         this.setTitle("模板表工具");
-        this.setSize(600,420);
+        this.setSize(600,620);
         this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         this.setLocationRelativeTo(null);
         this.setResizable(false);
@@ -134,15 +147,30 @@ public class MainFrame extends JFrame {
         checkBox_exportAll = new JCheckBox("全选所有表");
         checkBox_exportAll.setBounds(140,340,100,20);
 
+        //分割线
+        sepLine = new JLabel("");
+        sepLine.setBounds(10, 380, 260, 1);
+        sepLine.setBorder(BorderFactory.createLineBorder(Color.GRAY));
+
+        // excel文件路径
+        label_excelFilePath = new JLabel("excel文件路径");
+        label_excelFilePath.setBounds(20,390,100,20);
+        btn_chooseExcelFilePath = new JButton("选择");
+        btn_chooseExcelFilePath.setBounds(130,390,60,20);
+        btn_readFile = new JButton("读取");
+        btn_readFile.setBounds(200,390,60,20);
+        textField_excelFilePath = new JTextField();
+        textField_excelFilePath.setBounds(20,420,240,20);
+
         // 信息显示
         textArea_sout = new SystemOutTextArea();
-        textArea_sout.setBounds(270,20,280,320);
+        textArea_sout.setBounds(280,20,300,520);
         textArea_sout.setEditable(false);
         scrollPane_sout = new JScrollPane(textArea_sout);
         scrollPane_sout.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
-        scrollPane_sout.setBounds(270,20,280,320);
+        scrollPane_sout.setBounds(280,20,300,520);
         btn_clear = new JButton("清除");
-        btn_clear.setBounds(470,345,80,20);
+        btn_clear.setBounds(500,550,80,20);
 
         addGUIComponent();
         addListener();
@@ -172,6 +200,11 @@ public class MainFrame extends JFrame {
         this.add(checkBox_exportAll);
         this.add(scrollPane_sout);
         this.add(btn_clear);
+        this.add(sepLine);
+        this.add(label_excelFilePath);
+        this.add(btn_chooseExcelFilePath);
+        this.add(btn_readFile);
+        this.add(textField_excelFilePath);
     }
 
     private void addListener(){
@@ -187,14 +220,13 @@ public class MainFrame extends JFrame {
                 String dbName = textField_dbName.getText().toString();
                 bean.setDataBase(DbConnectController.dbConnect(dbType,username,password,ip,port,dbName));
                 if(bean.getDataBase() != null && bean.getDataBase().isConnect()){
-                    UserDataBean cache = bean.getUserCache();
-                    cache.userData.put("dbType",dbType);
-                    cache.userData.put("username",username);
-                    cache.userData.put("password",password);
-                    cache.userData.put("ip",ip);
-                    cache.userData.put("port",port);
-                    cache.userData.put("dbName",dbName);
-                    WriteXmlController.writeUserData(cache);
+                    userCache.userData.put("dbType",dbType);
+                    userCache.userData.put("username",username);
+                    userCache.userData.put("password",password);
+                    userCache.userData.put("ip",ip);
+                    userCache.userData.put("port",port);
+                    userCache.userData.put("dbName",dbName);
+                    WriteXmlController.writeUserData(userCache);
                 }
             }
             refresh();
@@ -219,27 +251,35 @@ public class MainFrame extends JFrame {
                 db.generateXml(new String[]{path},tableName,db.getAllDataByTableName(tableName),db.getAllColumsByTableName(tableName));
             }
 
-            UserDataBean cache = bean.getUserCache();
-            cache.userData.put("tableName",tableName);
-            cache.userData.put("path",path);
-            WriteXmlController.writeUserData(bean.getUserCache());
+            userCache.userData.put("tableName",tableName);
+            userCache.userData.put("path",path);
+            WriteXmlController.writeUserData(userCache);
         });
         btn_clear.addActionListener(e -> {
             textArea_sout.clearText();
             refresh();
         });
+        btn_chooseExcelFilePath.addActionListener(e -> {
+            textField_excelFilePath.setText(
+                    FileChooserManager.getInstance().chooseFile(userCache.userData.get("excelPath"),this)
+            );
+        });
+        btn_readFile.addActionListener(e -> {
+            String filePath = textField_excelFilePath.getText().toString();
+            System.out.println("读取文件：" + filePath);
+        });
     }
 
     private void loadCache(){
-        UserDataBean cache = bean.getUserCache();
-        comboBox_dbtype.setSelectedItem(cache.userData.get("dbType"));
-        textField_ip.setText(cache.userData.get("ip"));
-        textField_port.setText(cache.userData.get("port"));
-        textField_username.setText(cache.userData.get("username"));
-        psdField_password.setText(cache.userData.get("password"));
-        textField_dbName.setText(cache.userData.get("dbName"));
-        comboBox_tableName.setSelectedItem(cache.userData.get("tableName"));
-        textField_path.setText(cache.userData.get("path"));
+        comboBox_dbtype.setSelectedItem(userCache.userData.get("dbType"));
+        textField_ip.setText(userCache.userData.get("ip"));
+        textField_port.setText(userCache.userData.get("port"));
+        textField_username.setText(userCache.userData.get("username"));
+        psdField_password.setText(userCache.userData.get("password"));
+        textField_dbName.setText(userCache.userData.get("dbName"));
+        comboBox_tableName.setSelectedItem(userCache.userData.get("tableName"));
+        textField_path.setText(userCache.userData.get("path"));
+        textField_excelFilePath.setText(userCache.userData.get("excelPath"));
     }
 
     public void refresh(){
@@ -269,7 +309,7 @@ public class MainFrame extends JFrame {
         comboBox_tableName.setEnabled(isConnect);
         comboBox_tableName.removeAllItems();
         for(String str:bean.getTableList()) comboBox_tableName.addItem(str);
-        comboBox_tableName.setSelectedItem(bean.getUserCache().userData.get("tableName"));
+        comboBox_tableName.setSelectedItem(userCache.userData.get("tableName"));
         textField_path.setEnabled(isConnect);
 //
         //按钮
