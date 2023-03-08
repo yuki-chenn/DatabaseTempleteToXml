@@ -84,4 +84,12 @@ public class ExcelBean {
         replaceList.clear();
     }
 
+    public static void clear(){
+        System.out.println("关闭文件");
+        workbook = null;
+        sheetList = null;
+        columns = null;
+        replaceList = null;
+    }
+
 }

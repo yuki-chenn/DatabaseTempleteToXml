@@ -316,13 +316,20 @@ public class MainFrame extends JFrame {
             );
         });
         btn_readFile.addActionListener(e -> {
-            String filePath = textField_excelFilePath.getText().toString();
-            excelBean.workbook = ReadExcelController.readExcel(filePath);
-            if(excelBean.workbook != null){
-                userCache.userData.put("excelPath",filePath);
-                WriteXmlController.writeUserData(userCache);
+            boolean isRead = excelBean.workbook != null;
+            if(!isRead){
+                String filePath = textField_excelFilePath.getText().toString();
+                excelBean.workbook = ReadExcelController.readExcel(filePath);
+                if(excelBean.workbook != null){
+                    userCache.userData.put("excelPath",filePath);
+                    WriteXmlController.writeUserData(userCache);
+                }
+                refreshExcelPanel();
+            }else{
+                excelBean.clear();
+                refreshExcelPanel();
             }
-            refreshExcelPanel();
+
         });
         comboBox_tarSheetName.addItemListener(e -> {
             if(e.getStateChange() == ItemEvent.SELECTED){
@@ -419,13 +426,12 @@ public class MainFrame extends JFrame {
 
     }
 
-
     public void refreshExcelPanel(){
         boolean isRead = excelBean.workbook != null;
 
         label_excelFilePath.setEnabled(!isRead);
         btn_chooseExcelFilePath.setEnabled(!isRead);
-        btn_readFile.setEnabled(!isRead);
+        btn_readFile.setText(isRead ? "关闭" : "读取");
         textField_excelFilePath.setEnabled(!isRead);
 
         comboBox_tarSheetName.setEnabled(isRead);
