@@ -1,16 +1,21 @@
 package Frame;
 
 import Controller.DbConnectController;
+import Controller.FileChooseController;
+import Controller.ReadExcelController;
 import Controller.WriteXmlController;
 import DataBaseUtil.BaseDb;
-import FileUtil.FileChooserManager;
 import Model.DbBean;
+import Model.ExcelBean;
+import Model.ReplaceItem;
 import Model.UserDataBean;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 
 /**
  * @author yuki
@@ -64,19 +69,24 @@ public class MainFrame extends JFrame {
     JButton btn_readFile;
 
     // 一键替换
+    JLabel label_arrow;
     JComboBox<String> comboBox_tarSheetName;
     JComboBox<String> comboBox_tarColumnName;
     JComboBox<String> comboBox_foreignSheetName;
+    JComboBox<String> comboBox_foreignColumnName;
     JComboBox<String> comboBox_replaceItem;
     JButton btn_addReplace;
     JButton btn_delReplace;
-
+    JButton btn_modify;
+    JCheckBox checkBox_overwrite;
 
     // 提示信息
     JScrollPane scrollPane_sout;
     SystemOutTextArea textArea_sout;
 
     DbBean bean;
+
+    ExcelBean excelBean;
 
     UserDataBean userCache;
 
@@ -85,13 +95,14 @@ public class MainFrame extends JFrame {
         bean = new DbBean();
         initGUI();
         loadCache();
-        refresh();
+        refreshDbPanel();
+        refreshExcelPanel();
     }
 
     private void initGUI(){
 
         this.setTitle("模板表工具");
-        this.setSize(600,620);
+        this.setSize(650,620);
         this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         this.setLocationRelativeTo(null);
         this.setResizable(false);
@@ -157,7 +168,7 @@ public class MainFrame extends JFrame {
 
         //分割线
         sepLine = new JLabel("");
-        sepLine.setBounds(10, 380, 260, 1);
+        sepLine.setBounds(10, 380, 315, 1);
         sepLine.setBorder(BorderFactory.createLineBorder(Color.GRAY));
 
         // excel文件路径
@@ -168,7 +179,7 @@ public class MainFrame extends JFrame {
         btn_readFile = new JButton("读取");
         btn_readFile.setBounds(200,390,60,20);
         textField_excelFilePath = new JTextField();
-        textField_excelFilePath.setBounds(20,420,240,20);
+        textField_excelFilePath.setBounds(20,420,305,20);
 
         // 一键替换
         comboBox_tarSheetName = new JComboBox<String>();
@@ -176,23 +187,31 @@ public class MainFrame extends JFrame {
         comboBox_tarColumnName = new JComboBox<String>();
         comboBox_tarColumnName.setBounds(20,480,100,20);
         comboBox_foreignSheetName = new JComboBox<String>();
-        comboBox_foreignSheetName.setBounds(150,465,100,20);
-        btn_addReplace = new JButton("√");
-        btn_addReplace.setBounds(180,435,20,20);
+        comboBox_foreignSheetName.setBounds(160,450,100,20);
+        comboBox_foreignColumnName = new JComboBox<String>();
+        comboBox_foreignColumnName.setBounds(160,480,100,20);
+        label_arrow = new JLabel("—>");
+        label_arrow.setBounds(130,465,50,20);
+        btn_addReplace = new JButton("增加");
+        btn_addReplace.setBounds(265,465,60,20);
         comboBox_replaceItem = new JComboBox<String>();
-        comboBox_replaceItem.setBounds(20,480,100,20);
+        comboBox_replaceItem.setBounds(20,510,240,20);
         btn_delReplace = new JButton("删除");
-        btn_delReplace.setBounds(130,480,20,20);
+        btn_delReplace.setBounds(265,510,60,20);
+        btn_modify = new JButton("修改");
+        btn_modify.setBounds(20,540,100,20);
+        checkBox_overwrite = new JCheckBox("覆盖源文件");
+        checkBox_overwrite.setBounds(130,540,100,20);
 
         // 信息显示
         textArea_sout = new SystemOutTextArea();
-        textArea_sout.setBounds(280,20,300,520);
+        textArea_sout.setBounds(330,20,300,520);
         textArea_sout.setEditable(false);
         scrollPane_sout = new JScrollPane(textArea_sout);
         scrollPane_sout.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
-        scrollPane_sout.setBounds(280,20,300,520);
+        scrollPane_sout.setBounds(330,20,300,520);
         btn_clear = new JButton("清除");
-        btn_clear.setBounds(500,550,80,20);
+        btn_clear.setBounds(550,550,80,20);
 
         addGUIComponent();
         addListener();
@@ -230,9 +249,13 @@ public class MainFrame extends JFrame {
         this.add(comboBox_tarSheetName);
         this.add(comboBox_tarColumnName);
         this.add(comboBox_foreignSheetName);
-//        this.add(comboBox_replaceItem);
-//        this.add(btn_addReplace);
-//        this.add(btn_delReplace);
+        this.add(comboBox_foreignColumnName);
+        this.add(label_arrow);
+        this.add(comboBox_replaceItem);
+        this.add(btn_addReplace);
+        this.add(btn_delReplace);
+        this.add(btn_modify);
+        this.add(checkBox_overwrite);
     }
 
     private void addListener(){
@@ -257,7 +280,7 @@ public class MainFrame extends JFrame {
                     WriteXmlController.writeUserData(userCache);
                 }
             }
-            refresh();
+            refreshDbPanel();
         });
         btn_export.addActionListener(e -> {
             String path = textField_path.getText().toString();
@@ -285,16 +308,63 @@ public class MainFrame extends JFrame {
         });
         btn_clear.addActionListener(e -> {
             textArea_sout.clearText();
-            refresh();
+            refreshDbPanel();
         });
         btn_chooseExcelFilePath.addActionListener(e -> {
             textField_excelFilePath.setText(
-                    FileChooserManager.getInstance().chooseFile(userCache.userData.get("excelPath"),this)
+                    FileChooseController.chooseFile(userCache.userData.get("excelPath"),this)
             );
         });
         btn_readFile.addActionListener(e -> {
             String filePath = textField_excelFilePath.getText().toString();
-            System.out.println("读取文件：" + filePath);
+            excelBean.workbook = ReadExcelController.readExcel(filePath);
+            if(excelBean.workbook != null){
+                userCache.userData.put("excelPath",filePath);
+                WriteXmlController.writeUserData(userCache);
+            }
+            refreshExcelPanel();
+        });
+        comboBox_tarSheetName.addItemListener(e -> {
+            if(e.getStateChange() == ItemEvent.SELECTED){
+                comboBox_tarColumnName.removeAllItems();
+                for(String str:excelBean.getSheetColumns(comboBox_tarSheetName.getSelectedIndex())) comboBox_tarColumnName.addItem(str);
+            }
+        });
+        comboBox_foreignSheetName.addItemListener(e -> {
+            if(e.getStateChange() == ItemEvent.SELECTED){
+                comboBox_foreignColumnName.removeAllItems();
+                for(String str:excelBean.getSheetColumns(comboBox_foreignSheetName.getSelectedIndex())) comboBox_foreignColumnName.addItem(str);
+            }
+        });
+        btn_addReplace.addActionListener(e -> {
+            excelBean.addReplaceItem(new ReplaceItem(
+                    comboBox_tarSheetName.getSelectedIndex(),
+                    comboBox_tarColumnName.getSelectedIndex(),
+                    comboBox_foreignSheetName.getSelectedIndex(),
+                    comboBox_foreignColumnName.getSelectedIndex()
+            ));
+            comboBox_replaceItem.removeAllItems();
+            for(String str:excelBean.getReplaceList()) comboBox_replaceItem.addItem(str);
+
+        });
+        btn_delReplace.addActionListener(e -> {
+            excelBean.removeRepalceItem(comboBox_replaceItem.getSelectedIndex());
+            comboBox_replaceItem.removeAllItems();
+            for(String str:excelBean.getReplaceList()) comboBox_replaceItem.addItem(str);
+        });
+        btn_modify.addActionListener(e -> {
+            for(ReplaceItem item:excelBean.replaceList){
+                if(!ReadExcelController.replace(excelBean.workbook,item)){
+                    System.out.println("外键" + item.toString() + "替换失败");
+                    return;
+                }
+            }
+            String filePath = textField_excelFilePath.getText().toString();
+            String newFilePath = filePath.substring(0,filePath.lastIndexOf('.')) + "_replace" + filePath.substring(filePath.lastIndexOf('.'));
+            ReadExcelController.writeExcel(excelBean.workbook,checkBox_overwrite.isSelected() ? filePath : newFilePath);
+            excelBean.removeAllRepalceItem();
+            comboBox_replaceItem.removeAllItems();
+            for(String str:excelBean.getReplaceList()) comboBox_replaceItem.addItem(str);
         });
     }
 
@@ -310,7 +380,7 @@ public class MainFrame extends JFrame {
         textField_excelFilePath.setText(userCache.userData.get("excelPath"));
     }
 
-    public void refresh(){
+    public void refreshDbPanel(){
         boolean isConnect = bean.getDataBase() != null && bean.getDataBase().isConnect();
 
         label_dbType.setEnabled(!isConnect);
@@ -348,5 +418,30 @@ public class MainFrame extends JFrame {
 
 
     }
+
+
+    public void refreshExcelPanel(){
+        boolean isRead = excelBean.workbook != null;
+
+        label_excelFilePath.setEnabled(!isRead);
+        btn_chooseExcelFilePath.setEnabled(!isRead);
+        btn_readFile.setEnabled(!isRead);
+        textField_excelFilePath.setEnabled(!isRead);
+
+        comboBox_tarSheetName.setEnabled(isRead);
+        comboBox_tarSheetName.removeAllItems();
+        for(String str:excelBean.getSheetList()) comboBox_tarSheetName.addItem(str);
+        comboBox_tarColumnName.setEnabled(isRead);
+        comboBox_foreignSheetName.setEnabled(isRead);
+        comboBox_foreignSheetName.removeAllItems();
+        for(String str:excelBean.getSheetList()) comboBox_foreignSheetName.addItem(str);
+        comboBox_foreignColumnName.setEnabled(isRead);
+        label_arrow.setEnabled(isRead);
+        btn_addReplace.setEnabled(isRead);
+        comboBox_replaceItem.setEnabled(isRead);
+        btn_delReplace.setEnabled(isRead);
+        btn_modify.setEnabled(isRead);
+    }
+
 
 }
